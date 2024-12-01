@@ -704,7 +704,7 @@ int check_ei(void)
 // Add "what" to 'eventignore' to skip loading syntax highlighting for every
 // buffer loaded into the window.  "what" must start with a comma.
 // Returns the old value of 'eventignore' in allocated memory.
-char *au_event_disable(char *what)
+char *au_event_disable(const char *what)
 {
   char *save_ei = xstrdup(p_ei);
   char *new_ei = xstrnsave(p_ei, strlen(p_ei) + strlen(what));
@@ -2510,7 +2510,6 @@ bool au_event_is_empty(event_T event)
 static char *arg_event_skip(char *arg, bool have_group)
 {
   char *pat;
-  char *p;
 
   if (*arg == '*') {
     if (arg[1] && !ascii_iswhite(arg[1])) {
@@ -2519,6 +2518,7 @@ static char *arg_event_skip(char *arg, bool have_group)
     }
     pat = arg + 1;
   } else {
+    char *p;
     for (pat = arg; *pat && *pat != '|' && !ascii_iswhite(*pat); pat = p) {
       if ((int)event_name2nr(pat, &p) >= NUM_EVENTS) {
         if (have_group) {
@@ -2559,7 +2559,7 @@ static int arg_augroup_get(char **argp)
 }
 
 /// Handles grabbing arguments from `:autocmd` such as ++once and ++nested
-static bool arg_autocmd_flag_get(bool *flag, char **cmd_ptr, char *pattern, int len)
+static bool arg_autocmd_flag_get(bool *flag, char **cmd_ptr, const char *pattern, int len)
 {
   if (strncmp(*cmd_ptr, pattern, (size_t)len) == 0 && ascii_iswhite((*cmd_ptr)[len])) {
     if (*flag) {

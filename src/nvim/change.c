@@ -265,7 +265,7 @@ static void changed_common(buf_T *buf, linenr_T lnum, colnr_T col, linenr_T lnum
         // Don't create a new entry when the line number is the same
         // as the last one and the column is not too far away.  Avoids
         // creating many entries for typing "xxxxx".
-        pos_T *p = &buf->b_changelist[buf->b_changelistlen - 1].mark;
+        const pos_T *p = &buf->b_changelist[buf->b_changelistlen - 1].mark;
         if (p->lnum != lnum) {
           add = true;
         } else {
@@ -850,7 +850,7 @@ int del_char(bool fixpos)
 int del_chars(int count, int fixpos)
 {
   int bytes = 0;
-  char *p = get_cursor_pos_ptr();
+  const char *p = get_cursor_pos_ptr();
   for (int i = 0; i < count && *p != NUL; i++) {
     int l = utfc_ptr2len(p);
     bytes += l;
@@ -952,7 +952,7 @@ int del_bytes(colnr_T count, bool fixpos_arg, bool use_delcombine)
 /// Leaves the cursor on the first non-blank in the line.
 ///
 /// @return true if the line was changed.
-bool copy_indent(int size, char *src)
+bool copy_indent(int size, const char *src)
 {
   char *p = NULL;
   char *line = NULL;
@@ -967,7 +967,7 @@ bool copy_indent(int size, char *src)
     ind_len = 0;
     int ind_done = 0;
     int ind_col = 0;
-    char *s = src;
+    const char *s = src;
 
     // Count/copy the usable portion of the source line.
     while (todo > 0 && ascii_iswhite(*s)) {
@@ -1933,9 +1933,15 @@ void truncate_line(int fixpos)
 {
   linenr_T lnum = curwin->w_cursor.lnum;
   colnr_T col = curwin->w_cursor.col;
-  char *old_line = ml_get(lnum);
-  char *newp = col == 0 ? xstrdup("") : xstrnsave(old_line, (size_t)col);
+  char *newp;
   int deleted = ml_get_len(lnum) - col;
+
+  if (col == 0) {
+    newp = xstrdup("");
+  } else {
+    const char *old_line = ml_get(lnum);
+    newp = xstrnsave(old_line, (size_t)col);
+  }
 
   ml_replace(lnum, newp, false);
 
@@ -1993,7 +1999,7 @@ void del_lines(linenr_T nlines, bool undo)
 /// When "flags" is not NULL, it is set to point to the flags of the recognized comment leader.
 /// "backward" must be true for the "O" command.
 /// If "include_space" is set, include trailing whitespace while calculating the length.
-int get_leader_len(char *line, char **flags, bool backward, bool include_space)
+int get_leader_len(const char *line, char **flags, bool backward, bool include_space)
 {
   int j;
   bool got_com = false;
@@ -2133,7 +2139,7 @@ int get_leader_len(char *line, char **flags, bool backward, bool include_space)
 ///
 /// When "flags" is not null, it is set to point to the flags describing the
 /// recognized comment leader.
-int get_last_leader_offset(char *line, char **flags)
+int get_last_leader_offset(const char *line, char **flags)
 {
   int result = -1;
   int j;

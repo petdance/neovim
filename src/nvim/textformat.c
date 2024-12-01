@@ -488,7 +488,7 @@ static int fmt_check_par(linenr_T lnum, int *leader_len, char **leader_flags, bo
 /// @return  true if line "lnum" ends in a white character.
 static bool ends_in_white(linenr_T lnum)
 {
-  char *s = ml_get(lnum);
+  const char *s = ml_get(lnum);
 
   if (*s == NUL) {
     return false;
@@ -502,8 +502,8 @@ static bool ends_in_white(linenr_T lnum)
 /// @param lnum  The first line.  White-space is ignored.
 ///
 /// @note the whole of 'leader1' must match 'leader2_len' characters from 'leader2'.
-static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int leader2_len,
-                        char *leader2_flags)
+static bool same_leader(linenr_T lnum, int leader1_len, const char *leader1_flags,
+                        int leader2_len, const char *leader2_flags)
 {
   int idx1 = 0;
   int idx2 = 0;
@@ -518,7 +518,7 @@ static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int
   // If first leader has 's' flag, the lines can only be joined if there is
   // some text after it and the second line has the 'm' flag.
   if (leader1_flags != NULL) {
-    for (char *p = leader1_flags; *p && *p != ':'; p++) {
+    for (const char *p = leader1_flags; *p && *p != ':'; p++) {
       if (*p == COM_FIRST) {
         return leader2_len == 0;
       }
@@ -547,7 +547,7 @@ static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int
   // The first line has to be saved, only one line can be locked at a time.
   char *line1 = xstrdup(ml_get(lnum));
   for (idx1 = 0; ascii_iswhite(line1[idx1]); idx1++) {}
-  char *line2 = ml_get(lnum + 1);
+  const char *line2 = ml_get(lnum + 1);
   for (idx2 = 0; idx2 < leader2_len; idx2++) {
     if (!ascii_iswhite(line2[idx2])) {
       if (line1[idx1++] != line2[idx2]) {
@@ -682,7 +682,7 @@ void auto_format(bool trailblank, bool prev_line)
   // need to add a space when 'w' is in 'formatoptions' to keep a paragraph
   // formatted.
   if (!wasatend && has_format_option(FO_WHITE_PAR)) {
-    char *linep = get_cursor_line_ptr();
+    const char *linep = get_cursor_line_ptr();
     colnr_T len = get_cursor_line_len();
     if (curwin->w_cursor.col == len) {
       char *plinep = xstrnsave(linep, (size_t)len + 2);

@@ -426,8 +426,8 @@ void set_bufref(bufref_T *bufref, buf_T *buf)
 /// the same allocated memory, but it's a different buffer.
 ///
 /// @param bufref Buffer reference to check for.
-bool bufref_valid(bufref_T *bufref)
-  FUNC_ATTR_PURE
+bool bufref_valid(const bufref_T *bufref)
+  FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   return bufref->br_buf_free_count == buf_free_count
          ? true
@@ -439,7 +439,7 @@ bool bufref_valid(bufref_T *bufref)
 /// Can be slow if there are many buffers, prefer using bufref_valid().
 ///
 /// @param buf The buffer to check for.
-bool buf_valid(buf_T *buf)
+bool buf_valid(const buf_T *buf)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   if (buf == NULL) {
@@ -459,6 +459,7 @@ bool buf_valid(buf_T *buf)
 /// Give an error message and return false when the buffer is locked or the
 /// screen is being redrawn and the buffer is in a window.
 static bool can_unload_buffer(buf_T *buf)
+  FUNC_ATTR_WARN_UNUSED_RESULT
 {
   bool can_unload = !buf->b_locked;
 
@@ -471,14 +472,15 @@ static bool can_unload_buffer(buf_T *buf)
     }
   }
   if (!can_unload) {
-    char *fname = buf->b_fname != NULL ? buf->b_fname : buf->b_ffname;
+    const char *fname = buf->b_fname != NULL ? buf->b_fname : buf->b_ffname;
     semsg(_(e_attempt_to_delete_buffer_that_is_in_use_str),
           fname != NULL ? fname : "[No Name]");
   }
   return can_unload;
 }
 
-bool buf_locked(buf_T *buf)
+bool buf_locked(const buf_T *buf)
+  FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   return buf->b_locked || buf->b_locked_split;
 }
@@ -2238,7 +2240,7 @@ buf_T *buflist_findname_exp(char *fname)
 /// Skips dummy buffers.
 ///
 /// @return  buffer or NULL if not found
-buf_T *buflist_findname(char *ffname)
+buf_T *buflist_findname(const char *ffname)
 {
   FileID file_id;
   bool file_id_valid = os_fileid(ffname, &file_id);
@@ -2249,7 +2251,7 @@ buf_T *buflist_findname(char *ffname)
 /// getting it twice for the same file.
 ///
 /// @return  buffer or NULL if not found
-static buf_T *buflist_findname_file_id(char *ffname, FileID *file_id, bool file_id_valid)
+static buf_T *buflist_findname_file_id(const char *ffname, FileID *file_id, bool file_id_valid)
   FUNC_ATTR_PURE
 {
   // Start at the last buffer, expect to find a match sooner.
@@ -2517,9 +2519,6 @@ int ExpandBufnames(char *pat, int *num_file, char ***file, int options)
     if (to_free) {
       xfree(patc);
     }
-  }
-
-  if (!fuzzy) {
     if (matches != NULL) {
       if (count > 1) {
         qsort(matches, (size_t)count, sizeof(bufmatch_T), buf_time_compare);
@@ -2713,7 +2712,7 @@ static bool wininfo_other_tab_diff(wininfo_T *wip)
 /// @param skip_diff_buffer  when true, avoid windows with 'diff' set that is in another tab page.
 ///
 /// @return  NULL when there isn't any info.
-static wininfo_T *find_wininfo(buf_T *buf, bool need_options, bool skip_diff_buffer)
+static wininfo_T *find_wininfo(const buf_T *buf, bool need_options, bool skip_diff_buffer)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_PURE
 {
   wininfo_T *wip;
@@ -2795,7 +2794,7 @@ void get_winopts(buf_T *buf)
 /// Find the mark for the buffer 'buf' for the current window.
 ///
 /// @return  a pointer to no_position if no position is found.
-fmark_T *buflist_findfmark(buf_T *buf)
+fmark_T *buflist_findfmark(const buf_T *buf)
   FUNC_ATTR_PURE
 {
   static fmark_T no_position = { { 1, 0, 0 }, 0, 0, { 0 }, NULL };
@@ -2805,7 +2804,7 @@ fmark_T *buflist_findfmark(buf_T *buf)
 }
 
 /// Find the lnum for the buffer 'buf' for the current window.
-linenr_T buflist_findlnum(buf_T *buf)
+linenr_T buflist_findlnum(const buf_T *buf)
   FUNC_ATTR_PURE
 {
   return buflist_findfmark(buf)->mark.lnum;
@@ -3011,7 +3010,7 @@ int setfname(buf_T *buf, char *ffname_arg, char *sfname_arg, bool message)
 
 /// Crude way of changing the name of a buffer.  Use with care!
 /// The name should be relative to the current directory.
-void buf_set_name(int fnum, char *name)
+void buf_set_name(int fnum, const char *name)
 {
   buf_T *buf = buflist_findnr(fnum);
   if (buf == NULL) {
@@ -3120,7 +3119,7 @@ void buflist_altfpos(win_T *win)
 /// Fname must have a full path (expanded by path_to_absolute()).
 ///
 /// @param  ffname  full path name to check
-bool otherfile(char *ffname)
+bool otherfile(const char *ffname)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL
 {
   return otherfile_buf(curbuf, ffname, NULL, false);
@@ -3133,7 +3132,7 @@ bool otherfile(char *ffname)
 /// @param  ffname         full path name to check
 /// @param  file_id_p      information about the file at "ffname".
 /// @param  file_id_valid  whether a valid "file_id_p" was passed in.
-static bool otherfile_buf(buf_T *buf, char *ffname, FileID *file_id_p, bool file_id_valid)
+static bool otherfile_buf(buf_T *buf, const char *ffname, FileID *file_id_p, bool file_id_valid)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   // no name is different
@@ -3191,7 +3190,7 @@ void buf_set_file_id(buf_T *buf)
 ///
 /// @param  buf      buffer
 /// @param  file_id  file id
-static bool buf_same_file_id(buf_T *buf, FileID *file_id)
+static bool buf_same_file_id(const buf_T *buf, const FileID *file_id)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL
 {
   return buf->file_id_valid && os_fileid_equal(&(buf->file_id), file_id);
@@ -3476,7 +3475,7 @@ void maketitle(void)
 /// @param[in,out]  last  current title string
 ///
 /// @return  true if resettitle() is to be called.
-static bool value_change(char *str, char **last)
+static bool value_change(const char *str, char **last)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
   if ((str == NULL) != (*last == NULL)
@@ -3603,8 +3602,8 @@ void fname_expand(buf_T *buf, char **ffname, char **sfname)
 }
 
 /// @return  true if "buf" is a prompt buffer.
-bool bt_prompt(buf_T *buf)
-  FUNC_ATTR_PURE
+bool bt_prompt(const buf_T *buf)
+  FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   return buf != NULL && buf->b_p_bt[0] == 'p';
 }
@@ -4027,7 +4026,7 @@ bool bt_dontwrite_msg(const buf_T *const buf)
 /// @return  true if the buffer should be hidden, according to 'hidden', ":hide"
 ///          and 'bufhidden'.
 bool buf_hide(const buf_T *const buf)
-  FUNC_ATTR_PURE
+  FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   // 'bufhidden' overrules 'hidden' and ":hide", check it first
   switch (buf->b_p_bh[0]) {

@@ -314,7 +314,7 @@ void check_pos(buf_T *buf, pos_T *pos)
 /// Make sure curwin->w_cursor.lnum is valid.
 void check_cursor_lnum(win_T *win)
 {
-  buf_T *buf = win->w_buffer;
+  const buf_T *buf = win->w_buffer;
   if (win->w_cursor.lnum > buf->b_ml.ml_line_count) {
     // If there is a closed fold at the end of the file, put the cursor in
     // its first line.  Otherwise in the last line.

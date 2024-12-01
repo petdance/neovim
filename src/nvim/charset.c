@@ -731,7 +731,7 @@ int char2cells(int c)
 /// @return number of display cells.
 int ptr2cells(const char *p_in)
 {
-  uint8_t *p = (uint8_t *)p_in;
+  const uint8_t *p = (const uint8_t *)p_in;
   // For UTF-8 we need to look at more bytes if the first byte is >= 0x80.
   if (*p >= 0x80) {
     return utf_ptr2cells(p_in);
