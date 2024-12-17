@@ -91,7 +91,7 @@ static int64_t group_get_ns(const char *group)
 
 static const char *sign_get_name(DecorSignHighlight *sh)
 {
-  char *name = sh->sign_name;
+  const char *name = sh->sign_name;
   return !name ? "" : map_has(cstr_t, &sign_map, name) ? name : "[Deleted]";
 }
 
@@ -103,7 +103,7 @@ static const char *sign_get_name(DecorSignHighlight *sh)
 /// @param prio  sign priority
 /// @param lnum  line number which gets the mark
 /// @param sp  sign properties
-static void buf_set_sign(buf_T *buf, uint32_t *id, char *group, int prio, linenr_T lnum, sign_T *sp)
+static void buf_set_sign(buf_T *buf, uint32_t *id, const char *group, int prio, linenr_T lnum, sign_T *sp)
 {
   if (group && !map_get(String, int)(&namespace_ids, cstr_as_string(group))) {
     kv_push(sign_ns, nvim_create_namespace(cstr_as_string(group)));
@@ -138,7 +138,7 @@ static void buf_set_sign(buf_T *buf, uint32_t *id, char *group, int prio, linenr
 /// @param group  sign group
 /// @param prio  sign priority
 /// @param sp  sign pointer
-static linenr_T buf_mod_sign(buf_T *buf, uint32_t *id, char *group, int prio, sign_T *sp)
+static linenr_T buf_mod_sign(buf_T *buf, uint32_t *id, const char *group, int prio, sign_T *sp)
 {
   int64_t ns = group_get_ns(group);
   if (ns < 0 || (group && ns == 0)) {
@@ -159,7 +159,7 @@ static linenr_T buf_mod_sign(buf_T *buf, uint32_t *id, char *group, int prio, si
 /// @param buf  buffer to store sign in
 /// @param id  sign ID
 /// @param group  sign group
-static int buf_findsign(buf_T *buf, int id, char *group)
+static int buf_findsign(buf_T *buf, int id, const char *group)
 {
   int64_t ns = group_get_ns(group);
   if (ns < 0 || (group && ns == 0)) {
@@ -193,7 +193,7 @@ static int sign_row_cmp(const void *p1, const void *p2)
 /// @param group  sign group
 /// @param id  sign id
 /// @param atlnum  single sign at this line, specified signs at any line when -1
-static int buf_delete_signs(buf_T *buf, char *group, int id, linenr_T atlnum)
+static int buf_delete_signs(buf_T *buf, const char *group, int id, linenr_T atlnum)
 {
   int64_t ns = group_get_ns(group);
   if (ns < 0) {
@@ -256,7 +256,7 @@ bool buf_has_signs(const buf_T *buf)
 }
 
 /// List placed signs for "rbuf".  If "rbuf" is NULL do it for all buffers.
-static void sign_list_placed(buf_T *rbuf, char *group)
+static void sign_list_placed(buf_T *rbuf, const char *group)
 {
   char lbuf[MSG_BUF_LEN];
   char namebuf[MSG_BUF_LEN];
@@ -324,7 +324,7 @@ static void sign_list_placed(buf_T *rbuf, char *group)
 ///
 /// @param begin_cmd  begin of sign subcmd
 /// @param end_cmd  just after sign subcmd
-static int sign_cmd_idx(char *begin_cmd, char *end_cmd)
+static int sign_cmd_idx(const char *begin_cmd, char *end_cmd)
 {
   int idx;
   char save = *end_cmd;
@@ -400,7 +400,7 @@ int init_sign_text(sign_T *sp, schar_T *sign_text, char *text)
 }
 
 /// Define a new sign or update an existing sign
-static int sign_define_by_name(char *name, char *icon, char *text, char *linehl, char *texthl,
+static int sign_define_by_name(const char *name, char *icon, char *text, char *linehl, char *texthl,
                                char *culhl, char *numhl, int prio)
 {
   cstr_t *key;
@@ -518,7 +518,7 @@ static void sign_list_by_name(char *name)
 }
 
 /// Place a sign at the specified file location or update a sign.
-static int sign_place(uint32_t *id, char *group, char *name, buf_T *buf, linenr_T lnum, int prio)
+static int sign_place(uint32_t *id, const char *group, const char *name, buf_T *buf, linenr_T lnum, int prio)
 {
   // Check for reserved character '*' in group name
   if (group != NULL && (*group == '*' || *group == NUL)) {
@@ -551,7 +551,7 @@ static int sign_place(uint32_t *id, char *group, char *name, buf_T *buf, linenr_
   return OK;
 }
 
-static int sign_unplace_inner(buf_T *buf, int id, char *group, linenr_T atlnum)
+static int sign_unplace_inner(buf_T *buf, int id, const char *group, linenr_T atlnum)
 {
   if (!buf_has_signs(buf)) {  // No signs in the buffer
     return FAIL;
@@ -574,7 +574,7 @@ static int sign_unplace_inner(buf_T *buf, int id, char *group, linenr_T atlnum)
 }
 
 /// Unplace the specified sign for a single or all buffers
-static int sign_unplace(buf_T *buf, int id, char *group, linenr_T atlnum)
+static int sign_unplace(buf_T *buf, int id, const char *group, linenr_T atlnum)
 {
   if (buf != NULL) {
     return sign_unplace_inner(buf, id, group, atlnum);
@@ -590,7 +590,7 @@ static int sign_unplace(buf_T *buf, int id, char *group, linenr_T atlnum)
 }
 
 /// Jump to a sign.
-static linenr_T sign_jump(int id, char *group, buf_T *buf)
+static linenr_T sign_jump(int id, const char *group, buf_T *buf)
 {
   linenr_T lnum = buf_findsign(buf, id, group);
 
@@ -667,7 +667,7 @@ static void sign_define_cmd(char *name, char *cmdline)
 }
 
 /// ":sign place" command
-static void sign_place_cmd(buf_T *buf, linenr_T lnum, char *name, int id, char *group, int prio)
+static void sign_place_cmd(buf_T *buf, linenr_T lnum, char *name, int id, const char *group, int prio)
 {
   if (id <= 0) {
     // List signs placed in a file/buffer
@@ -719,7 +719,7 @@ static void sign_unplace_cmd(buf_T *buf, linenr_T lnum, const char *name, int id
 ///   :sign jump {id} buffer={nr}
 ///   :sign jump {id} group={group} file={fname}
 ///   :sign jump {id} group={group} buffer={nr}
-static void sign_jump_cmd(buf_T *buf, linenr_T lnum, const char *name, int id, char *group)
+static void sign_jump_cmd(buf_T *buf, linenr_T lnum, const char *name, int id, const char *group)
 {
   if (name == NULL && group == NULL && id == -1) {
     emsg(_(e_argreq));
@@ -1220,7 +1220,7 @@ void set_context_in_sign_cmd(expand_T *xp, char *arg)
 
 /// Define a sign using the attributes in 'dict'. Returns 0 on success and -1 on
 /// failure.
-static int sign_define_from_dict(char *name, dict_T *dict)
+static int sign_define_from_dict(const char *name, dict_T *dict)
 {
   if (name == NULL) {
     name = tv_dict_get_string(dict, "name", false);
@@ -1279,7 +1279,7 @@ void f_sign_define(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   // Define a single sign
   rettv->vval.v_number = -1;
 
-  char *name = (char *)tv_get_string_chk(&argvars[0]);
+  const char *name = tv_get_string_chk(&argvars[0]);
   if (name == NULL) {
     return;
   }
@@ -1380,7 +1380,7 @@ void f_sign_jump(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   // Sign group
-  char *group = (char *)tv_get_string_chk(&argvars[1]);
+  const char *group = tv_get_string_chk(&argvars[1]);
   if (group == NULL) {
     return;
   }
@@ -1423,7 +1423,7 @@ static int sign_place_from_dict(typval_T *id_tv, typval_T *group_tv, typval_T *n
     }
   }
 
-  char *group = NULL;
+  const char *group = NULL;
   if (group_tv == NULL) {
     di = tv_dict_find(dict, "group", -1);
     if (di != NULL) {
@@ -1431,7 +1431,7 @@ static int sign_place_from_dict(typval_T *id_tv, typval_T *group_tv, typval_T *n
     }
   }
   if (group_tv != NULL) {
-    group = (char *)tv_get_string_chk(group_tv);
+    group = tv_get_string_chk(group_tv);
     if (group == NULL) {
       return -1;
     }
@@ -1440,7 +1440,7 @@ static int sign_place_from_dict(typval_T *id_tv, typval_T *group_tv, typval_T *n
     }
   }
 
-  char *name = NULL;
+  const char *name = NULL;
   if (name_tv == NULL) {
     di = tv_dict_find(dict, "name", -1);
     if (di != NULL) {
@@ -1450,7 +1450,7 @@ static int sign_place_from_dict(typval_T *id_tv, typval_T *group_tv, typval_T *n
   if (name_tv == NULL) {
     return -1;
   }
-  name = (char *)tv_get_string_chk(name_tv);
+  name = tv_get_string_chk(name_tv);
   if (name == NULL) {
     return -1;
   }
@@ -1541,7 +1541,7 @@ static void sign_undefine_multiple(list_T *l, list_T *retlist)
 {
   TV_LIST_ITER_CONST(l, li, {
     int retval = -1;
-    char *name = (char *)tv_get_string_chk(TV_LIST_ITEM_TV(li));
+    const char *name = tv_get_string_chk(TV_LIST_ITEM_TV(li));
     if (name != NULL && (sign_undefine_by_name(name) == OK)) {
       retval = 0;
     }
@@ -1586,7 +1586,7 @@ static int sign_unplace_from_dict(typval_T *group_tv, dict_T *dict)
   dictitem_T *di;
   int id = 0;
   buf_T *buf = NULL;
-  char *group = (group_tv != NULL) ? (char *)tv_get_string(group_tv)
+  const char *group = (group_tv != NULL) ? tv_get_string(group_tv)
                                    : tv_dict_get_string(dict, "group", false);
   if (group != NULL && group[0] == NUL) {
     group = NULL;
