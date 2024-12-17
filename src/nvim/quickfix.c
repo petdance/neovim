@@ -4047,7 +4047,7 @@ static void qf_update_buffer(qf_info_T *qi, qfline_T *old_last)
 
 // Add an error line to the quickfix buffer.
 static int qf_buf_add_line(qf_list_T *qfl, buf_T *buf, linenr_T lnum, const qfline_T *qfp,
-                           char *dirname, char *qftf_str, bool first_bufline)
+                           char *dirname, const char *qftf_str, bool first_bufline)
   FUNC_ATTR_NONNULL_ARG(1, 2, 4, 5)
 {
   garray_T *gap = qfga_get();
@@ -4222,13 +4222,13 @@ static void qf_fill_buffer(qf_list_T *qfl, buf_T *buf, qfline_T *old_last, int q
     bool invalid_val = false;
 
     while (lnum < qfl->qf_count) {
-      char *qftf_str = NULL;
+      const char *qftf_str = NULL;
 
       // Use the text supplied by the user defined function (if any).
       // If the returned value is not string, then ignore the rest
       // of the returned values and use the default.
       if (qftf_li != NULL && !invalid_val) {
-        qftf_str = (char *)tv_get_string_chk(TV_LIST_ITEM_TV(qftf_li));
+        qftf_str = tv_get_string_chk(TV_LIST_ITEM_TV(qftf_li));
         if (qftf_str == NULL) {
           invalid_val = true;
         }

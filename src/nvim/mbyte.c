@@ -2346,7 +2346,7 @@ char *enc_skip(char *p)
 /// case characters and '_' replaced with '-'.
 ///
 /// @return  an allocated string.
-char *enc_canonize(char *enc)
+char *enc_canonize(const char *enc)
   FUNC_ATTR_NONNULL_RET
 {
   if (strcmp(enc, "default") == 0) {
@@ -2358,7 +2358,7 @@ char *enc_canonize(char *enc)
   char *r = xmalloc(strlen(enc) + 3);
   // Make it all lower case and replace '_' with '-'.
   char *p = r;
-  for (char *s = enc; *s != NUL; s++) {
+  for (const char *s = enc; *s != NUL; s++) {
     if (*s == '_') {
       *p++ = '-';
     } else {

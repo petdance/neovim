@@ -74,22 +74,22 @@ char *get_mess_lang(void)
 /// This uses LC_MESSAGES when available, which it is for most systems we build for
 /// except for windows. Then fallback to get the value from the environment
 /// ourselves, and use LC_CTYPE as a last resort.
-static char *get_mess_env(void)
+static const char *get_mess_env(void)
 {
 #ifdef LC_MESSAGES
   return get_locale_val(LC_MESSAGES);
 #else
-  char *p = (char *)os_getenv("LC_ALL");
+  const char *p = os_getenv("LC_ALL");
   if (p != NULL) {
     return p;
   }
 
-  p = (char *)os_getenv("LC_MESSAGES");
+  p = os_getenv("LC_MESSAGES");
   if (p != NULL) {
     return p;
   }
 
-  p = (char *)os_getenv("LANG");
+  p = os_getenv("LANG");
   if (p != NULL && ascii_isdigit(*p)) {
     p = NULL;  // ignore something like "1043"
   }
@@ -153,12 +153,12 @@ void ex_language(exarg_T *eap)
 # define VIM_LC_MESSAGES 6789
 #endif
 
-  char *name = eap->arg;
+  const char *name = eap->arg;
 
   // Check for "messages {name}", "ctype {name}" or "time {name}" argument.
   // Allow abbreviation, but require at least 3 characters to avoid
   // confusion with a two letter language name "me" or "ct".
-  char *p = skiptowhite(eap->arg);
+  const char *p = skiptowhite(eap->arg);
   if ((*p == NUL || ascii_iswhite(*p)) && p - eap->arg >= 3) {
     if (STRNICMP(eap->arg, "messages", p - eap->arg) == 0) {
       what = VIM_LC_MESSAGES;

@@ -219,7 +219,7 @@ static int in_history(int type, const char *str, int move_to_front, int sep)
 
     // For search history, check that the separator character matches as
     // well.
-    char *p = history[type][i].hisstr;
+    const char *p = history[type][i].hisstr;
     if (strcmp(str, p) == 0
         && (type != HIST_SEARCH || sep == p[history[type][i].hisstrlen + 1])) {
       if (!move_to_front) {
@@ -426,7 +426,7 @@ int clr_history(const int histype)
 /// Remove all entries matching {str} from a history.
 ///
 /// @param histype  may be one of the HIST_ values.
-static int del_history_entry(int histype, char *str)
+static int del_history_entry(int histype, const char *str)
 {
   if (hislen == 0 || histype < 0 || histype >= HIST_COUNT || *str == NUL
       || hisidx[histype] < 0) {
@@ -548,7 +548,7 @@ void f_histdel(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     // string given: remove all matching entries
     char buf[NUMBUFLEN];
     n = del_history_entry(get_histtype(str, strlen(str), false),
-                          (char *)tv_get_string_buf(&argvars[1], buf));
+                          tv_get_string_buf(&argvars[1], buf));
   }
   rettv->vval.v_number = n;
 }

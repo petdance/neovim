@@ -2140,7 +2140,7 @@ static void get_maparg(typval_T *argvars, typval_T *rettv, int exact)
   rettv->v_type = VAR_STRING;
   rettv->vval.v_string = NULL;
 
-  char *keys = (char *)tv_get_string(&argvars[0]);
+  const char *keys = tv_get_string(&argvars[0]);
   if (*keys == NUL) {
     return;
   }

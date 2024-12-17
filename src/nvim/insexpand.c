@@ -796,7 +796,7 @@ static inline void free_cptext(char *const *const cptext)
 /// @return NOTDONE if the given string is already in the list of completions,
 ///         otherwise it is added to the list and  OK is returned. FAIL will be
 ///         returned in case of error.
-static int ins_compl_add(char *const str, int len, char *const fname, char *const *const cptext,
+static int ins_compl_add(const char *const str, int len, const char *const fname, char *const *const cptext,
                          const bool cptext_allocated, typval_T *user_data, const Direction cdir,
                          int flags_arg, const bool adup, int user_abbr_hlattr, int user_kind_hlattr)
   FUNC_ATTR_NONNULL_ARG(1)
@@ -2612,7 +2612,7 @@ static int ins_compl_add_tv(typval_T *const tv, const Direction dir, bool fast)
     tv_clear(&user_data);
     return FAIL;
   }
-  int status = ins_compl_add((char *)word, -1, NULL, cptext, true,
+  int status = ins_compl_add(word, -1, NULL, cptext, true,
                              &user_data, dir, flags, dup,
                              user_abbr_hlattr, user_kind_hlattr);
   if (status != OK) {

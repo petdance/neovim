@@ -2798,7 +2798,7 @@ static void update_search_stat(int dirc, pos_T *pos, pos_T *cursor_pos, searchst
 void f_searchcount(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   pos_T pos = curwin->w_cursor;
-  char *pattern = NULL;
+  const char *pattern = NULL;
   int maxcount = SEARCH_STAT_DEF_MAX_COUNT;
   int timeout = SEARCH_STAT_DEF_TIMEOUT;
   bool recompute = true;
@@ -2842,7 +2842,7 @@ void f_searchcount(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     }
     di = tv_dict_find(dict, "pattern", -1);
     if (di != NULL) {
-      pattern = (char *)tv_get_string_chk(&di->di_tv);
+      pattern = tv_get_string_chk(&di->di_tv);
       if (pattern == NULL) {
         return;
       }
@@ -3155,7 +3155,7 @@ static int fuzzy_match_recursive(const char *fuzpat, const char *str, uint32_t s
 ///
 /// @return true if "pat_arg" matches "str". Also returns the match score in
 /// "outScore" and the matching character positions in "matches".
-bool fuzzy_match(char *const str, const char *const pat_arg, const bool matchseq,
+bool fuzzy_match(const char *const str, const char *const pat_arg, const bool matchseq,
                  int *const outScore, uint32_t *const matches, const int maxMatches)
   FUNC_ATTR_NONNULL_ALL
 {
@@ -3241,7 +3241,7 @@ static int fuzzy_match_item_compare(const void *const s1, const void *const s2)
 /// for each item or use "item_cb" Funcref function to get the string.
 /// If "retmatchpos" is true, then return a list of positions where "str"
 /// matches for each item.
-static void fuzzy_match_in_list(list_T *const l, char *const str, const bool matchseq,
+static void fuzzy_match_in_list(list_T *const l, const char *const str, const bool matchseq,
                                 const char *const key, Callback *const item_cb,
                                 const bool retmatchpos, list_T *const fmatchlist,
                                 const int max_matches)
@@ -3442,7 +3442,7 @@ static void do_fuzzymatch(const typval_T *const argvars, typval_T *const rettv,
   }
 
   fuzzy_match_in_list(argvars[0].vval.v_list,
-                      (char *)tv_get_string(&argvars[1]), matchseq, key,
+                      tv_get_string(&argvars[1]), matchseq, key,
                       &cb, retmatchpos, rettv->vval.v_list, max_matches);
   callback_free(&cb);
 }
