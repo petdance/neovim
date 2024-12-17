@@ -1307,7 +1307,7 @@ int tslua_push_querycursor(lua_State *L)
     while (lua_next(L, 5)) {
       // [dict, ..., key, value]
       if (lua_type(L, -2) == LUA_TSTRING) {
-        char *k = (char *)lua_tostring(L, -2);
+        const char *k = lua_tostring(L, -2);
         if (strequal("max_start_depth", k)) {
           uint32_t max_start_depth = (uint32_t)lua_tointeger(L, -1);
           ts_query_cursor_set_max_start_depth(cursor, max_start_depth);
